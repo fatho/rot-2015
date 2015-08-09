@@ -1,0 +1,822 @@
+\documentclass[xcolor={dvipsnames,svgnames}]{beamer}
+\usetheme{Amsterdam}
+
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{remreset}
+\usepackage[backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\usepackage[babel]{csquotes}
+\usepackage{graphicx}
+\usepackage[caption=false]{subfig}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{stmaryrd}
+\usepackage{colortbl}
+\usepackage{upgreek}
+\usepackage{makecell}
+\usepackage{qtree}
+\usepackage{bussproofs}
+\usepackage{booktabs}
+\usepackage{calc}
+\usepackage{tabularx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{xkeyval}
+\usepackage{todonotes}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usetikzlibrary{arrows,arrows.meta,calc,shapes,decorations.pathreplacing,trees,backgrounds}
+\def\UrlBreaks{\do\/\do-}
+
+\presetkeys{todonotes}{inline}{}
+\setbeamercolor{description item}{fg=blue}
+
+\bibliography{literature}
+\renewcommand*{\bibfont}{\small}
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+\newenvironment{proenv}{\only{\setbeamercolor{local structure}{fg=green}}}{}
+\newenvironment{conenv}{\only{\setbeamercolor{local structure}{fg=red}}}{}
+
+\newcommand{\ignore}[1]{}
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+\newcommand{\inner}[2]{\langle{} #1, #2 \rangle{}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\vecTwo}[2]{\left(\begin{array}{c} #1 \\ #2 \end{array} \right)}
+\newcommand{\vecThree}[3]{\left(\begin{array}{c} #1 \\ #2 \\ #3 \end{array} \right)}
+
+\title{Einführung in Machine Learning und Klassifikationsalgorithmen}
+\subtitle{}
+\subject{}
+\keywords{Machine Learning}
+\author{Fabian Thorand}
+\institute{Internationale Sommerakademie der Studienstiftung in Rot an der Rot}
+\date{Tag 8}
+
+\definecolor{darkgreen}{rgb}{0,0.501960784,0}
+\definecolor{darkred}{rgb}{0.639215686,0.082352941,0.082352941}
+\definecolor{turquoise}{rgb}{0.168627451,0.568627451,0.68627451}
+\lstset{
+	language=Haskell,
+    basicstyle=\small\ttfamily,
+    breaklines=true,             % Automatische Zeilenumbrüche
+    showstringspaces=false,      % Markierung von Leerzeichen in Strings (sieht ausgeschaltet einfach besser aus)
+    tabsize=4,                   % Anzahl an Leerzeichen pro Tab
+    keywordstyle=\color{blue},   % Stil der Schlüsselwörter (LaTeX Stil)
+    commentstyle=\color{darkgreen},  % Stil der Kommentare (LaTeX Stil)
+    stringstyle=\color{darkred},     % Stil von Strings (LaTeX Stil)
+    % Mit emph legen wir eine Reihe an Keywords fest, denen wir dann mit emphstyle einen Stil zuweisen.
+    emphstyle=\color{blue}
+    }
+
+% ----------- Befehle für Section-Page ----------------------------- %
+\renewcommand{\sectionname}{Abschnitt}
+
+\begin{document}
+
+%----------- Titlefolie ---------------------------------------------%
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Einführung}
+
+\begin{frame}{Was ist maschinelles Lernen?}
+  \begin{itemize}
+  \item Ableitung von Wissen aus Beispielen/Erfahrung
+  \item dabei: Verallgemeinerung, nicht bloßes \enquote{Auswendiglernen}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Arten des maschinellen Lernens}
+
+  \begin{itemize}
+  \item Überwachtes Lernen (Supervised Learning)
+  \item Unüberwachtes Lernen (Unsupervised Learning)
+  \item Bestärkendes Lernen (Reinforcement Learning)
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Herausforderungen}
+  Wahl des richtigen Modells (Bias-Varianz-Dilemma):
+  \begin{itemize}
+  \item Zu flexibel: Overfitting
+  \item Zu inflexibel: Underfitting
+  \end{itemize}
+  
+  Unterschiedliche Skalen der zu lernenden Features (Bsp. Schiff)
+  \begin{itemize}
+  \item Tiefgang ($\sim 10^1\,\mathrm{m}$) vs. Maschinenleistung ($\sim 10^6\,\mathrm{PS}$)
+  \item Daten möglichst normieren
+  \end{itemize}
+
+  Zahl der Dimensionen
+  \begin{itemize}
+  \item Wenige Stichproben in hochdimensionalem Raum schwer zu klassifizieren
+  \item ``curse of dimensionality''
+  \end{itemize}
+\end{frame}
+
+\section{Überwachtes Lernen}
+
+\begin{frame}{Überwachtes Lernen}
+
+  \begin{exampleblock}{Anwendungsgebiete}
+    \begin{itemize}
+    \item Lernen von Funktionsparametern
+    \item Klassifikation von Daten (z.B. Handschrifterkennung)
+    \end{itemize}
+  \end{exampleblock}
+
+  \begin{block}{Trainingsmenge}
+    \textit{Datenpunkte} mit \textit{Klassifikation}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Naive Bayes}
+  \begin{itemize}
+  \item Feature-Vektor: $\mathbf{x} = (x_1,\ldots,x_n)^T$
+  \item Kategorien: $C_1,\ldots,C_K$
+  \item Ziel: Bestimmung von $p(C_k\vert \mathbf{x})$ für $k=1,\ldots,K$
+  \end{itemize}
+  Klassifizierung dann über
+  \[
+    h(\mathbf{x}) = \text{arg}\max_{k=1,\ldots,K} p(C_k\vert \mathbf{x})
+  \]
+  $p(C_k\vert \mathbf{x})$ ist oft zu groß, um es explizit zu modellieren.
+\end{frame}
+
+\begin{frame}{Naive Bayes (fort.)}
+  \begin{itemize}
+  \item Annahme: $x_1,\ldots,x_n$ sind voneinander unabhängig.
+  \item Anwendung von Bayes' Theorem
+    \begin{align*}
+      p(C_k\vert \mathbf{x}) 
+      &= \frac{p(C_k)p(\mathbf{x}|C_k)}{p(\mathbf{x})} \\
+      &= \frac{p(C_k)\prod_{i=1}^n p(x_i|C_k)}{p(\mathbf{x})}
+    \end{align*}
+  \item $p(C_k)$, $p(x_i\vert C_k)$ und $p(\mathbf{x})$ können aus
+    Trainingsdaten geschätzt werden (z.B. über Maximum-Likelihood-Schätzer)
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{Lineare Klassifikation}
+  \begin{figure}
+    \centering
+    \subfloat[linear separierbar]{
+      \centering
+      \begin{tikzpicture}[framed]
+        \draw[fill=red] (1,2) circle (0.1);
+        \draw[fill=red] (2,3) circle (0.1);
+        \draw[fill=red] (2.5,2) circle (0.1);
+        \draw[fill=red] (1.5,1) circle (0.1);
+        \draw[fill=red] (4,1.5) circle (0.1);
+        \draw[fill=blue] (5,5) circle (0.1);
+        \draw[fill=blue] (4,3.2) circle (0.1);
+        \draw[fill=blue] (1.7,4.7) circle (0.1);
+        \draw[fill=blue] (5,3) circle (0.1);
+        \draw[fill=blue] (3,4.5) circle (0.1);
+        \draw (1,5) -- (5,1);
+      \end{tikzpicture}
+    }
+    \subfloat[nicht-linear separierbar]{
+      \centering
+      \begin{tikzpicture}[framed]
+        \draw[draw=none] (1,1) rectangle (5,5);
+        \draw[fill=red] (3.2,5.1) circle (0.1);
+        \draw[fill=red] (1.2,3.5) circle (0.1);
+        \draw[fill=red] (5,2) circle (0.1);
+        \draw[fill=red] (2.5,1.2) circle (0.1);
+        \draw[fill=red] (2.2,4.8) circle (0.1);
+        \draw[fill=red] (1.3,2.2) circle (0.1);
+        \draw[fill=red] (4.8,3.2) circle (0.1);
+        \draw[fill=blue] (2,3.5) circle (0.1);
+        \draw[fill=blue] (2.6,3) circle (0.1);
+        \draw[fill=blue] (3.8,3.8) circle (0.1);
+        \draw[fill=blue] (3.7,2) circle (0.1);
+        %\draw (5,5) .. controls (1,4) and (1,2) .. (5,1);
+        \draw (3,3) circle (1.5);
+      \end{tikzpicture}
+    }
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Rückblick: Perzeptron}
+  \textit{Binäre} Klassifikation parametrisiert über $w \in \mathbb{R}^n, b \in
+  \mathbb{R}$
+  \begin{itemize}
+  \item Trennende Hyperebene: $f_{w,b}(x) = \inner{w}{x} - b$
+  \item Ausgabefunktion: $h_{w,b}(x) = sign(f_{w,b}(x))$
+  \item Trainingsdaten $x^{(i)} \in \mathbb{R}^n, y^{(i)} \in \{+1,-1\}$, $i \in
+    \{1,\ldots,m\}$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Margin}
+  \begin{minipage}{0.39\linewidth}
+    \begin{tikzpicture}[scale=0.8]
+      \draw[fill=red] (1,2) circle (0.1);
+      \draw[fill=red] (2,2) circle (0.1);
+      \draw[fill=red] (1.5,1) circle (0.1);
+      
+      \coordinate[label=left:$A$] (A) at (3.5,1.5);
+      \coordinate[label=left:$B$] (B) at (1.5,3.5);
+
+      \draw[fill=red] (A) circle (0.1);
+      \draw[fill=red] (B) circle (0.1);
+
+      \draw[fill=blue] (5,5) circle (0.1);
+      \draw[fill=blue] (4,4.1) circle (0.1);
+      \draw[fill=blue] (5,3) circle (0.1);
+      \draw[fill=blue] (3,4.5) circle (0.1);
+      
+      \coordinate[label=right:$C$] (C) at (3.5,3.5);
+
+      \draw[fill=blue] (C) circle (0.1);
+
+      \coordinate (S) at (1,5);
+      \coordinate (T) at (5,1);
+
+      \draw (S) -- (T);
+      \draw (A) -- ($ (S)!(A)!(T) $);
+      \draw (B) -- ($ (S)!(B)!(T) $);
+      \draw (C) -- ($ (S)!(C)!(T) $);
+
+      \coordinate (SR) at ($ (A)!(S)!(B) $);
+      \coordinate (TR) at ($ (A)!(T)!(B) $);
+
+      \coordinate (SB) at ($ (S) + (C) - (S)!(C)!(T)$);
+      \coordinate (TB) at ($ (T) + (C) - (S)!(C)!(T)$);
+
+      \draw[dashed] (SR) -- (TR);
+      \draw[dashed] (SB) -- (TB);
+
+      \draw [decorate,decoration={brace}] (TB) -- (TR) node[xshift=25pt,yshift=5pt] {$M$};
+      
+    \end{tikzpicture}
+  \end{minipage}
+  \begin{minipage}{0.59\linewidth}
+    \begin{itemize}
+    \item $A$, $B$ und $C$ heißen \textit{Stützvektoren}
+    \item $M$ ist der \textit{Margin}
+    \end{itemize}
+
+    \begin{itemize}
+    \item größerer Margin $\rightarrow$ bessere Klassifikation
+    \item Perzeptron findet nur irgendeine Trennebene
+    \end{itemize}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Support Vector Machines (SVM)}
+  \textit{Binäre} Klassifikation parametrisiert über $w \in \mathbb{R}^n, b \in
+  \mathbb{R}$
+  \[
+    h_{w,b}(x) = sign(\inner{w}{x} + b) 
+    \text{ mit } 
+    sign(z) = \begin{cases}
+      +1 & \text{falls } z \geq 0 \\
+      -1 & \text{sonst}
+    \end{cases}
+  \]
+
+  Finde $w$ und $b$, sodass der Margin maximiert wird.
+\end{frame}
+
+\begin{frame}{Formalisierung des Margins}
+  \begin{definition}[Funktionaler Margin]
+    Abstand in der Klassifizierungsfunktion
+    \[
+      \begin{array}{r@{\quad:=\quad}l}
+        \hat{\gamma}^{(i)} & y^{(i)}(\inner{w}{x^{(i)}}+b) \\
+        \hat{\gamma} & \min_{i=1,\ldots,m}\hat{\gamma}^{(i)}
+      \end{array}
+    \]
+  \end{definition}
+  Skalierung von $w$ und $b$ führt zu verschiedenen funktionalen Margins für
+  die gleichen Testdaten!
+\end{frame}
+
+\begin{frame}{Formalisierung des Margins (fort.)}
+  \begin{definition}[Geometrischer Margin]
+    Tatsächlicher (geometrischer) Abstand
+    \[
+      \begin{array}{r@{\quad:=\quad}ll}
+        \gamma^{(i)} & y^{(i)}(\inner{\frac{w}{\norm{w}}}{x^{(i)}}+\frac{b}{\norm{w}}) & = \frac{1}{\norm{w}} \hat{\gamma}^{(i)} \\
+        \gamma & \min_{i=1,\ldots,m}\gamma^{(i)} & = \frac{1}{\norm{w}} \hat{\gamma}
+      \end{array}
+    \]
+  \end{definition}
+
+  \begin{itemize}
+  \item Wir fordern $\hat{\gamma} = 1$
+  \item $\gamma = \frac{1}{\norm{w}}$ wird dann minimal, wenn $\norm{w}$ maximal wird
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{Optimierungsproblem SVM}
+  \begin{exampleblock}{Zu lösendes Problem}
+    \[
+      \begin{array}{rl}
+        \text{min}_{w,b} & \frac{1}{2}\norm{w}^2 \\
+        \text{u.d.N.} & y^{(i)} \cdot (\inner{w}{x^{(i)}} + b) \geq 1, i = 1, \ldots, m
+      \end{array}
+    \]
+  \end{exampleblock}
+Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
+\[
+  \mathcal{L}(w,b,\alpha) = \frac{1}{2}\norm{w}^2 
+    - \sum_{i=1}^m{\alpha_i \left[ y^{(i)}(\inner{w}{x^{(i)}} + b) - 1 \right]}
+\]
+\end{frame}
+
+\begin{frame}{Duales Problem}
+  Einige Umformungen und Ausnutzung der KKT-Bedingungen\footnote{Karush-Kuhn-Tucker-Bedingungen} führen zum äquivalenten
+  dualen Problem
+
+  \begin{exampleblock}{Duales Problem}
+    \vspace{-1em}
+    \begin{align*}
+        \text{max}_{\alpha} \quad& \sum_{i=1}^m\alpha_i 
+                              - \frac{1}{2}\sum_{i,j=1}^m y^{(i)}y^{(j)}\alpha_i\alpha_j\inner{x^{(i)}}{x^{(j)}}  \\
+        \text{u.d.N.} \quad& \alpha_i \geq 0, i = 1, \ldots, m \\
+                            & \sum_{i=1}^m \alpha_i y^{(i)} = 0
+    \end{align*}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Duales Problem (fort.)}
+  Dabei gilt
+  \begin{itemize}
+    \item $\alpha_i > 0$ gdw. $x^{(i)}$ ein Stützvektor ist
+    \item $w = \sum_{i=1}^m \alpha_i y^{(i)} x^{(i)}$
+    \item $b = -\frac{1}{2}(\max_{i:y^{(i)}=-1} \inner{w}{x^{(i)}} + \min_{i:y^{(i)}=+1} \inner{w}{x^{(i)}} )$
+  \end{itemize}
+
+  \begin{block}{Beobachtung}
+    Die Trainingsvektoren $x^{(i)}$ werden nur innerhalb von
+    Skalarprodukten verwendet.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Kernel-Trick}
+  \begin{block}{Idee}
+    Nicht-linear separierbare Daten sind in einem höher-dimensionalen
+    Raum/mittels anderer Features möglicherweise doch linear separierbar. \\
+    (Bei gegebener Transformation $\phi : \mathbb{R}^n \to \mathbb{R}^d$)
+  \end{block}
+
+  \begin{alertblock}{Problem}
+    $\phi(x)$ kann teuer zu berechnen sein (bei sehr vielen Dimensionen)
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Kernel-Trick -- Umsetzung}
+  \begin{block}{Erinnerung}
+    Datenvektoren werden nur in Skalarprodukten verwendet
+  \end{block}
+
+  Ersetze $\inner{\phi(x)}{\phi(y)}$ durch Kernelfunktion
+  \[
+    \begin{array}{rcl}
+      K : \mathbb{R}^n \times \mathbb{R}^n & \to & \mathbb{R} \\
+      (x,y) & \mapsto & \inner{\phi(x)}{\phi(y)}
+    \end{array}
+  \]
+
+  $K$ ist in vielen Fällen deutlich einfacher zu berechnen
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Kernel-Trick -- Beispiel}
+
+  \pgfplotstableread{svm-sample.dat}{\svmSample}
+
+  \begin{tikzpicture}[scale=0.9]
+    \begin{axis}[axis equal
+      image,xmin=-2,xmax=2,ymin=-2,ymax=2,xlabel={$x$},ylabel={$y$}]
+      \addplot[scatter,only marks,scatter/classes={ a={mark=square*,blue},
+        b={mark=triangle*,red}}, scatter src=explicit symbolic]
+      table[meta=class] {\svmSample}; \addplot
+      [domain=0:2*pi,samples=50]({cos(deg(x))},{sin(deg(x))});
+    \end{axis}
+  \end{tikzpicture}
+  \framebreak
+  \begin{tikzpicture}
+    \begin{axis}[view={30}{60},xmin=0,xmax=4,ymin=0,ymax=4,zmin=-4,zmax=4,
+      xlabel={$x^2$},ylabel={$y^2$},zlabel={$\sqrt{2}\cdot xy$}]
+      \addplot3[
+      scatter,only marks,
+      scatter/classes={
+        a={mark=square*,blue}, 
+        b={mark=triangle*,red}}, 
+      scatter src=explicit symbolic] 
+      table[x expr={\thisrow{x}*\thisrow{x}},
+      y expr={\thisrow{y}*\thisrow{y}},
+      z expr={sqrt(2)*\thisrow{x}*\thisrow{y}},meta=class] {\svmSample};
+      \addplot3
+      [patch,mesh,patch type=rectangle]
+      coordinates {
+        (0,1,4)
+        (0,1,-4)
+        (1,0,-4)
+        (1,0,4)
+      };
+    \end{axis}
+  \end{tikzpicture}
+  \framebreak
+  \[
+    \phi(\vecTwo{x_1}{x_2})
+    = \vecThree{x_1^2}{x_2^2}{\sqrt{2}\cdot x_1x_2}
+  \]
+  \begin{align*}
+    K(\vecTwo{x_1}{x_2},\vecTwo{y_1}{y_2}) 
+    &= \inner{\phi(\vecTwo{x_1}{x_2})}{\phi(\vecTwo{y_1}{y_2})} \\
+    &= \inner{\vecThree{x_1^2}{x_2^2}{\sqrt{2}\cdot x_1x_2}}{\vecThree{y_1^2}{y_2^2}{\sqrt{2}\cdot y_1y_2}} \\
+    &= \inner{\vecTwo{x_1}{x_2}}{\vecTwo{y_1}{y_2}}^2
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Nicht exakt linear separierbare Daten}
+  \begin{itemize}
+  \item Kernel-Trick funktioniert nicht immer \\
+  Bsp.: stark verrauschte Daten
+  \item Einführung von Schlupf-Variablen
+  \end{itemize}
+
+  \begin{exampleblock}{Zu lösendes Problem}
+    \[
+      \begin{array}{rl}
+        \text{min}_{w,b} & \frac{1}{2}\norm{w}^2 + C\sum_{i=1}^m \xi_i \\
+        \text{u.d.N.} & y^{(i)} \cdot (\inner{w}{x^{(i)}} + b) \geq 1 - \xi_i, 
+                        i = 1, \ldots, m \\
+                         & \xi_i \geq 0, i = 1, \ldots, m
+      \end{array}
+    \]
+  \end{exampleblock}
+
+  Ungenauigkeiten werden zugelassen, aber mit Faktor $C$ bestraft.
+\end{frame}
+
+\begin{frame}{Nicht exakt linear separierbare Daten (fort.)}
+  \begin{exampleblock}{Duales Problem}
+    \vspace{-1em}
+    \begin{align*}
+        \text{max}_{\alpha} \quad& W(\alpha) := \sum_{i=1}^m\alpha_i 
+                              - \frac{1}{2}\sum_{i,j=1}^m y^{(i)}y^{(j)}\alpha_i\alpha_j\inner{x^{(i)}}{x^{(j)}}  \\
+        \text{u.d.N.} \quad& 0 \leq \alpha_i \leq C, i = 1, \ldots, m \\
+                            & \sum_{i=1}^m \alpha_i y^{(i)} = 0
+    \end{align*}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{SVM -- Algorithmus}
+
+  \begin{block}{SMO (sequential minimal optimization) \cite{PlattSMO}}
+    Wiederhole bis zur Konvergenz:
+    \begin{enumerate}
+    \item Wähle Koordinatenpaar $\alpha_i,\alpha_j$ (welches größten Fortschritt
+      ermöglicht)
+    \item Optimiere $W(\alpha)$ bzgl. $\alpha_i$ und $\alpha_j$, fixiere die
+      restlichen Koordinaten
+    \end{enumerate}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Weitere Verfahren}
+
+  \begin{itemize}
+  \item Regression (z.B. via Least-Mean-Squares)
+  \item Entscheidungsbäume
+  \item Boosting (Meta-Verfahren) \\
+    Kombination mehrerer einfacher Klassifikatoren zu einem guten
+  \end{itemize}
+
+\end{frame}
+
+\section{Unüberwachtes Lernen}
+
+\begin{frame}{Unüberwachtes Lernen}
+  \begin{exampleblock}{Anwendungsgebiete}
+    Automatisches Erkennen von Zusammenhängen in Daten
+    \begin{itemize}
+    \item Clustering
+    \item Principal Component Analysis
+    \item SOM (Self-organizing maps)
+    \end{itemize}
+  \end{exampleblock}
+
+  \begin{block}{Trainingsmenge}
+    nur \textit{Datenpunkte}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Clustering}
+  \begin{block}{Ziel}
+    Einteilung der Daten in ähnliche Gruppen
+  \end{block}
+
+  \pgfplotstableread{cluster-sample.dat}{\clusterSample}
+  
+  \centering
+  \begin{minipage}{0.4\linewidth}
+    \begin{tikzpicture}[scale=0.6]
+      \begin{axis}
+        \addplot[scatter,only marks,scatter src=0] table[meta=class] {\clusterSample};
+      \end{axis}
+    \end{tikzpicture}
+  \end{minipage}
+  \quad$\rightarrow$\quad
+  \begin{minipage}{0.4\linewidth}
+    \begin{tikzpicture}[scale=0.6]
+      \begin{axis}
+        \addplot[scatter,only marks,scatter/classes={ a={mark=square*,blue}, b={mark=triangle*,red}, c={darkgreen}}, scatter src=explicit symbolic] table[meta=class] {\clusterSample};
+      \end{axis}
+    \end{tikzpicture}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{$k$-Means Algorithmus}
+
+  \begin{block}{Beschreibung}
+    \begin{enumerate}
+    \item Wähle $k$ zufällige Datenpunkte als Clusterzentren.
+    \item Ordne jeden Datenpunkt dem nächsten Clusterzentrum zu.
+    \item Wähle die Zentroide dieser Cluster als neue Clusterzentren.
+    \end{enumerate}
+    wobei die Schritte 2 und 3 bis zu einem Abbruchkriterium wiederholt werden.
+  \end{block}
+
+  \begin{alertblock}{Nachteil}
+    Anzahl der Cluster $k$ muss bekannt sein, oder durch Ausprobieren ermittelt werden.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{$k$-Means Konvergenz}
+  Datenpunkte $x^{(1)}, \ldots, x^{(m)} \in \mathbb{R}^n$ \\ 
+  Clusterzentren $\mu^{(1)},\ldots,\mu^{(k)} \in \mathbb{R}^n$ \\
+  Clusterzuordnung $c^{(1)},\ldots,c^{(m)} \in \{1,\ldots,k\}$ \\
+  \vspace{1em}
+  $k$-Means konvergiert gegen lokales Minimum von
+  \[
+    J(c,\mu) = \sum_{i=1}^{m}\norm{x^{(i)} - \mu_{c^{(i)}}}^2
+  \]
+  Globales Minimum wird nicht immer gefunden.
+\end{frame}
+
+\begin{frame}{Weitere Clustering-Algorithmen}
+
+  \begin{block}{Agglomeratives Clustering}
+    \begin{enumerate}
+      \item Starte mit einem Cluster pro Datenpunkt
+      \item Füge dicht beieinander liegende Cluster zusammen
+    \end{enumerate}
+    Schritt 2 wird bis zu einem gewissen Maximalabstand wiederholt.
+  \end{block}
+
+  \begin{block}{Dichtebasierte Algorithmen}
+    Cluster sind Bereiche mit hoher Datendichte getrennt durch Bereiche mit
+    niedriger Dichte
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Dimensionsreduktion}
+  \begin{block}{Ziel}
+    Abbildung höher-dimensionaler Daten in niedrig-dimensionale Räume ohne
+    großen Informationsverlust.
+  \end{block}
+
+  \begin{exampleblock}{Beispiel}
+    Voneinander abhängende Attribute: \\
+    \textit{Beschleunigung} $\leftrightarrows$ \textit{Leistung (PS)} 
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Principal Component Analysis (PCA)}
+  \pgfplotstableread{pca-sample.dat}{\pcaSample}
+  \begin{minipage}{0.48\linewidth}
+    \begin{tikzpicture}[scale=0.6]
+      \begin{axis}[axis lines=middle,axis equal image,xmin=-2,xmax=2,ymin=-2,ymax=2]
+        \addplot[scatter,only marks,scatter src=0,scatter/use mapped color={draw=none,fill=black}] table {\pcaSample};
+        \draw[-{>[scale=2,line width=0.5pt]},draw=red](axis cs:0,0) -- (axis cs:1,1);
+        \draw[-{>[scale=2,line width=0.5pt]},draw=blue](axis cs:0,0) -- (axis cs:1,-1);
+      \end{axis}
+    \end{tikzpicture}
+  \end{minipage}
+  \begin{minipage}{0.48\linewidth}
+    \begin{tikzpicture}[scale=0.6]
+      \begin{axis}[axis lines=middle,axis equal image,xmin=-2,xmax=2,ymin=-2,ymax=2]
+        \addplot[scatter,only marks,scatter src=0,scatter/use mapped color={draw=red,fill=red}] table[ x
+        expr=0.5*(\thisrow{x}+\thisrow{y}), y
+        expr=0.5*(\thisrow{x}+\thisrow{y})] {\pcaSample};
+      \end{axis}
+    \end{tikzpicture}
+ 
+    \begin{tikzpicture}[scale=0.6]
+      \begin{axis}[axis lines=middle,axis equal image,xmin=-2,xmax=2,ymin=-2,ymax=2]
+        \addplot[scatter,only marks,scatter src=0,scatter/use mapped color={draw=blue,fill=blue}] table[ x
+        expr=0.5*(\thisrow{x}-\thisrow{y}), y
+        expr=0.5*(-\thisrow{x}+\thisrow{y})] {\pcaSample};
+      \end{axis}
+    \end{tikzpicture}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{PCA -- Vorbereitung}
+
+  Gegeben: Datenvektoren $x^{(1)},\ldots,x^{(m)} \in \mathbb{R}^n$
+  \vspace{1em}
+
+  Erwartungswert zentrieren:
+  
+  \begin{enumerate}
+  \item $\mu := \frac{1}{m}\sum_{i=1}^m x^{i}$
+  \item $x^{(i)} \leftarrow x^{(i)} - \mu$
+  \end{enumerate}
+
+  Varianz angleichen:
+
+  \begin{enumerate}
+  \setcounter{enumi}{2}
+  \item $\sigma_j^2 := \frac{1}{m}\sum_{i=1}^m{(x_j^{(i)})}^2$
+  \item $x_j^{(i)} \leftarrow \frac{x_j^{(i)}}{\sigma_j}$
+  \end{enumerate}
+
+\end{frame}
+
+\begin{frame}{PCA - Durchführung}
+  Empirische Kovarianzmatrix bestimmen:
+
+  \begin{enumerate}
+  \setcounter{enumi}{4}
+  \item $\Sigma := \frac{1}{m}\sum_{i=1}^m (x^{(i)} \cdot x^{(i)^T})$
+  \end{enumerate}
+
+  $\Sigma$ ist symmetrisch und reell \\
+  $\implies$ nach Spektralsatz orthogonal diagonalisierbar
+  (Hauptachsentransformation)
+
+  \begin{block}{Ergebnis}
+    Eigenwerte $\lambda_1 \geq \cdots \geq \lambda_n$ und \\
+    normierten Eigenvektoren $u_1,\ldots,u_n \in \mathbb{R}^n$ \\
+    Je größer $\lambda_i$ desto größer die Varianz entlang $u_i$
+  \end{block}
+\end{frame}
+
+\section{Bestärkendes Lernen}
+
+\begin{frame}{Bestärkendes Lernen}
+
+  \begin{exampleblock}{Anwendungsgebiete}
+    Lernen durch Interaktion mit der Umgebung
+  \end{exampleblock}
+
+  \begin{block}{Trainingsmenge}
+    \textit{Aktionsfolge} mit \textit{Belohnungen}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Markov-Entscheidungsprozesse (MEP)}
+
+  \begin{definition}
+    Ein Tupel $(S, A, \{P_{sa}\},\gamma,R)$
+    \begin{itemize}
+    \item $S$ ist die Zustandsmenge
+    \item $A$ ist die Menge zulässiger Aktionen
+    \item $P_{sa}$ ist für $s \in S, a \in A$ eine Zufallsverteilung über $S$
+    \item $\gamma \in \left[ 0, 1 \right]$ heißt Diskontfaktor. Gibt es
+      unendliche Zustandsfolgen, so muss $\gamma < 1$ sein.
+    \item $R : S \to \mathbb{R}$ ist die Rewardfunktion ($R(s)$ ist
+      Belohnung, wenn Zustand $s$ erreicht wird)
+    \end{itemize}
+  \end{definition}
+\end{frame}
+
+\begin{frame}{MEP -- Ablauf}
+  \begin{enumerate}
+  \item Aktueller Zustand ist $s_i$
+  \item Wahl einer Aktion $a_i$
+  \item Zufälliger Übergang in einen Zustand $s_{i+1} \sim P_{s_i,a_i}$
+  \end{enumerate}
+  Bildlich dargestellt:
+  \[
+    s_0 \xrightarrow{a_0} s_1 \xrightarrow{a_1} s_2 \xrightarrow{a_2} \cdots
+  \]
+  Der gesamte Gewinn ist dann
+  \[
+    R(s_0) + \gamma R(s_1) + \gamma^2 R(s_2) + \cdots
+  \]
+  Ziel: Wahl der Aktionen, die erwarteten Gewinn maximieren
+\end{frame}
+
+\begin{frame}{MEP -- Ansatz}
+  \begin{itemize}
+  \item Eine Abbildung $\pi : S \to A$ heißt \textit{Strategie}
+  \item In einem Zustand $s$ wird Aktion $\pi(s)$ ausgeführt
+  \item Wertfunktion einer Strategie \[V^\pi(s) =
+    \mathbb{E}\left[\sum_i \gamma^i R(s_i) \middle| s_0 = s, \pi \right]\]
+  \item $V^\pi$ erfüllt die \textbf{Bellman Gleichung}
+    \[
+      V^\pi(s) = R(s) + \gamma \sum_{s'\in S} P_{s\pi(s)}(s') V^\pi(s')
+    \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Value Iteration}
+  \begin{block}{Algorithmus}
+    \begin{enumerate}
+    \item Initialisiere $V_0(s) := 0$
+    \item Wiederhole bis Konvergenz:
+      \[
+        V_{t+1}(s) := R(s) + \max_{a\in A} \gamma \sum_{s' \in S} P_{sa}(s') V_t(s')
+      \]
+    \end{enumerate}
+  \end{block}
+  Die $V_t$ konvergieren gegen $V^{*}(s) = \max_{\pi} V^\pi(s)$ \\
+  Die optimale Strategie $\pi^* : S \to A$ ergibt sich durch
+  \[
+    \pi^*(s) = \text{arg}\max_{a\in A} \sum_{s'\in S}P_{sa}(s') V_t(s')
+  \]
+  und es gilt $V^*(s) = V^{\pi^*}(s)$ für alle $s \in S$
+\end{frame}
+
+\begin{frame}{Unbekanntes Modell}
+  Oft: Übergangsmodell $\{P_{sa}\}$ unbekannt
+
+  \begin{block}{Algorithmus}
+    \begin{enumerate}
+    \item Beginn mit zufälliger Strategie $\pi_0$
+    \item Wiederhole für $t=0,1,\ldots$
+      \begin{enumerate}
+      \item Exploration des Zustandsraumes mittels $\pi_t$
+      \item Aktualisierung der Schätzung von $\{P_{sa}\}$
+      \item Bestimmte $\pi_{t+1}$ mittels Value Iteration
+      \end{enumerate}
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\section{Zusammenfassung}
+
+\begin{frame}[allowframebreaks]{Zusammenfassung}
+
+  \begin{block}{Überwachtes Lernen}
+  In dieser Präsentation:
+  \begin{itemize}
+  \item Regression
+  \item Support-Vektor-Maschinen
+  \end{itemize}
+  Außerdem:
+  \begin{itemize}
+  \item Perzeptron
+  \item Neuronale Netzwerke
+  \item Entscheidungsbäume
+  \end{itemize}
+  \end{block}
+  \framebreak
+  \begin{block}{Unüberwachtes Lernen}
+    Clustering
+    \begin{itemize}
+    \item $k$-Means
+    \item Agglomerative Verfahren (z.B. Single-Linkage Clustering)
+    \item Dichtebasierte Verfahren (z.B. DBSCAN, OPTICS)
+    \end{itemize}
+    Dimensionsreduktion
+    \begin{itemize}
+    \item Principal Component Analysis
+    \end{itemize}
+  \end{block}
+  \framebreak
+  \begin{block}{Bestärkendes Lernen}
+    Markov-Entscheidungsprozesse
+    \begin{itemize}
+    \item Bekanntes Modell: Value-Iteration
+    \item Unbekanntes Modell: Exploration + Schätzung + Value-Iteration
+    \end{itemize}
+  \end{block}
+  \begin{block}{Allgemein}
+    \begin{itemize}
+    \item "`curse of dimensionality"'
+    \item Daten normalisieren
+    \item Overfitting \& Underfitting beachten
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[shrink=10]{Literatur}
+  \nocite{Bishop2006,CourseeraAndrewNg,Russell02artificialintelligence}
+  \printbibliography[heading=none]
+\end{frame}
+
+\end{document}
