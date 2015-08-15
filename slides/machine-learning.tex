@@ -1,4 +1,4 @@
-\documentclass[xcolor={dvipsnames,svgnames}]{beamer}
+\documentclass[xcolor={dvipsnames,svgnames},draft]{beamer}
 \usetheme{Amsterdam}
 
 \usepackage[ngerman]{babel}
@@ -139,6 +139,31 @@
 
 \end{frame}
 
+\begin{frame}{Regression}
+  Gegeben:
+  \begin{itemize}
+  \item Modell: $f_q : \mathbb{R}^m \to \mathbb{R} $ ($q$ ist Parametervektor)
+  \item Funktionsargumente: $x^{(1)},\ldots,x^{(n)} \in \mathbb{R}^m$ \\
+  \item Zielwerte: $y_1,\ldots, y_n \in \mathbb{R}$ \\
+  \end{itemize}
+  \vspace{1em}
+
+  Dann gilt mit Fehlern $\epsilon_1,\ldots,\epsilon_n$
+  \[
+    y_i = f_q(x_i) + \epsilon_i
+  \]
+  Ziel: $q$ so bestimmen, dass Fehler minimiert werden \\
+  Annahme: $\epsilon_i$ Normalverteilt (Gaußkurve)
+\end{frame}
+
+\begin{frame}{Least-Mean-Squares}
+  Gesamtfehler:
+  \[
+    h(q) := \sum_{i=1}^n (f_q(x^{(i)}) - y_i)^2
+  \]
+  Minimum mittels Gradientenabstieg bestimmen:
+\end{frame}
+
 \begin{frame}{Naive Bayes}
   \begin{itemize}
   \item Feature-Vektor: $\mathbf{x} = (x_1,\ldots,x_n)^T$
@@ -164,7 +189,34 @@
   \item $p(C_k)$, $p(x_i\vert C_k)$ und $p(\mathbf{x})$ können aus
     Trainingsdaten geschätzt werden (z.B. über Maximum-Likelihood-Schätzer)
   \end{itemize}
-  
+\end{frame}
+
+\begin{frame}{Beispiel: Spam-Filter}
+  \begin{itemize}
+  \item Zwei Klassen: $C_1=\text{Spam}, C_2=\text{Kein Spam}$
+  \item Text-Features
+    \begin{itemize}
+    \item Wörterbuch mit z.B. 5000 Wörtern
+    \item Text repräsentiert durch $\mathbf{x} = (x_1,\ldots,x_{5000}) \in
+      \{0,1\}^{5000}$ 
+    \item $x_i$ gibt an, ob Wort $i$ im Text vorkommt
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Beispiel: Spam-Filter (fort.)}
+  Trainingsbeispiele:
+  \begin{itemize}
+  \item $C_1: \mathbf{t}^{(1,1)},\ldots,\mathbf{t}^{(1,n_1)} \in \{0,1\}^{5000}$
+  \item $C_2: \mathbf{t}^{(1,1)},\ldots,\mathbf{t}^{(2,n_2)} \in \{0,1\}^{5000}$
+  \end{itemize}
+
+  Dann:
+  \begin{itemize}
+  \item $p(C_k) = \frac{n_k}{n_1 + n_2}, k \in \{1,2\}$
+  \item $p(x_j = 1 | C_1) = \frac{\sum_{i=1}^{n_1} 1\{t^{(1,i)}_j = 1\}}{n_1}$
+  \item $p(x_j = 1 | C_2) = \frac{\sum_{i=1}^{n_2} 1\{t^{(2,i)}_j = 1\}}{n_2}$
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Lineare Klassifikation}
@@ -436,12 +488,12 @@ Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
     \phi(\vecTwo{x_1}{x_2})
     = \vecThree{x_1^2}{x_2^2}{\sqrt{2}\cdot x_1x_2}
   \]
-  \begin{align*}
+  \[
     K(\vecTwo{x_1}{x_2},\vecTwo{y_1}{y_2}) 
-    &= \inner{\phi(\vecTwo{x_1}{x_2})}{\phi(\vecTwo{y_1}{y_2})} \\
-    &= \inner{\vecThree{x_1^2}{x_2^2}{\sqrt{2}\cdot x_1x_2}}{\vecThree{y_1^2}{y_2^2}{\sqrt{2}\cdot y_1y_2}} \\
-    &= \inner{\vecTwo{x_1}{x_2}}{\vecTwo{y_1}{y_2}}^2
-  \end{align*}
+    = \inner{\phi(\vecTwo{x_1}{x_2})}{\phi(\vecTwo{y_1}{y_2})}
+%    &= \inner{\vecThree{x_1^2}{x_2^2}{\sqrt{2}\cdot x_1x_2}}{\vecThree{y_1^2}{y_2^2}{\sqrt{2}\cdot y_1y_2}} \\
+    = \inner{\vecTwo{x_1}{x_2}}{\vecTwo{y_1}{y_2}}^2
+  \]
 \end{frame}
 
 \begin{frame}{Nicht exakt linear separierbare Daten}
@@ -670,6 +722,15 @@ Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
     normierten Eigenvektoren $u_1,\ldots,u_n \in \mathbb{R}^n$ \\
     Je größer $\lambda_i$ desto größer die Varianz entlang $u_i$
   \end{block}
+\end{frame}
+
+\begin{frame}{Self-Organizing Maps}
+
+  \begin{itemize}
+  \item Abbildung hochdimensionaler Daten auf 2D oder 3D Karte.
+  \item Nutzen als Filter vor weiteren Lernverfahren
+  \end{itemize}
+  
 \end{frame}
 
 \section{Bestärkendes Lernen}
