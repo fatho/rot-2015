@@ -86,7 +86,7 @@
 \section{Einführung}
 
 \begin{frame}{Was ist maschinelles Lernen?}
-  \begin{itemize}
+  \begin{itemize}[<+->]
   \item Ableitung von Wissen aus Beispielen/Erfahrung
   \item dabei: Verallgemeinerung, nicht bloßes \enquote{Auswendiglernen}.
   \end{itemize}
@@ -108,12 +108,16 @@
   \item Zu flexibel: Overfitting
   \item Zu inflexibel: Underfitting
   \end{itemize}
-  
+
+  \pause
+
   Unterschiedliche Skalen der zu lernenden Features (Bsp. Schiff)
   \begin{itemize}
   \item Tiefgang ($\sim 10^1\,\mathrm{m}$) vs. Maschinenleistung ($\sim 10^6\,\mathrm{PS}$)
   \item Daten möglichst normieren
   \end{itemize}
+
+  \pause
 
   Zahl der Dimensionen
   \begin{itemize}
@@ -129,7 +133,7 @@
   \begin{exampleblock}{Anwendungsgebiete}
     \begin{itemize}
     \item Lernen von Funktionsparametern
-    \item Klassifikation von Daten (z.B. Handschrifterkennung)
+    \item Klassifikation von Daten
     \end{itemize}
   \end{exampleblock}
 
@@ -148,10 +152,15 @@
   \end{itemize}
   \vspace{1em}
 
+  \pause
+
   Dann gilt mit Fehlern $\epsilon_1,\ldots,\epsilon_n$
   \[
     y_i = f_q(x_i) + \epsilon_i
   \]
+
+  \pause
+
   Ziel: $q$ so bestimmen, dass Fehler minimiert werden \\
   Annahme: $\epsilon_i$ Normalverteilt (Gaußkurve)
 \end{frame}
@@ -161,7 +170,8 @@
   \[
     h(q) := \sum_{i=1}^n (f_q(x^{(i)}) - y_i)^2
   \]
-  Minimum mittels Gradientenabstieg bestimmen:
+
+  Iterative Lösung mittels Gradientenabstieg
 \end{frame}
 
 \begin{frame}{Naive Bayes}
@@ -170,10 +180,16 @@
   \item Kategorien: $C_1,\ldots,C_K$
   \item Ziel: Bestimmung von $p(C_k\vert \mathbf{x})$ für $k=1,\ldots,K$
   \end{itemize}
+  
+  \pause
+
   Klassifizierung dann über
   \[
     h(\mathbf{x}) = \text{arg}\max_{k=1,\ldots,K} p(C_k\vert \mathbf{x})
   \]
+
+  \pause
+
   $p(C_k\vert \mathbf{x})$ ist oft zu groß, um es explizit zu modellieren.
 \end{frame}
 
@@ -187,20 +203,17 @@
       &= \frac{p(C_k)\prod_{i=1}^n p(x_i|C_k)}{p(\mathbf{x})}
     \end{align*}
   \item $p(C_k)$, $p(x_i\vert C_k)$ und $p(\mathbf{x})$ können aus
-    Trainingsdaten geschätzt werden (z.B. über Maximum-Likelihood-Schätzer)
+    Trainingsdaten geschätzt werden
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Beispiel: Spam-Filter}
   \begin{itemize}
   \item Zwei Klassen: $C_1=\text{Spam}, C_2=\text{Kein Spam}$
-  \item Text-Features
-    \begin{itemize}
-    \item Wörterbuch mit z.B. 5000 Wörtern
-    \item Text repräsentiert durch $\mathbf{x} = (x_1,\ldots,x_{5000}) \in
-      \{0,1\}^{5000}$ 
-    \item $x_i$ gibt an, ob Wort $i$ im Text vorkommt
-    \end{itemize}
+  \item Wörterbuch mit z.B. 5000 Wörtern
+  \item Text repräsentiert durch $\mathbf{x} = (x_1,\ldots,x_{5000}) \in
+    \{0,1\}^{5000}$ 
+  \item $x_i$ gibt an, ob Wort $i$ im Text vorkommt
   \end{itemize}
 \end{frame}
 
@@ -341,7 +354,6 @@
 
   Finde $w$ und $b$, sodass der Margin maximiert wird.
 \end{frame}
-
 \begin{frame}{Formalisierung des Margins}
   \begin{definition}[Funktionaler Margin]
     Abstand in der Klassifizierungsfunktion
@@ -369,7 +381,7 @@
 
   \begin{itemize}
   \item Wir fordern $\hat{\gamma} = 1$
-  \item $\gamma = \frac{1}{\norm{w}}$ wird dann minimal, wenn $\norm{w}$ maximal wird
+  \item $\gamma = \frac{1}{\norm{w}}$ wird dann maximal, wenn $\norm{w}$ minimal wird
   \end{itemize}
   
 \end{frame}
@@ -383,11 +395,12 @@
       \end{array}
     \]
   \end{exampleblock}
+\ignore{
 Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
 \[
   \mathcal{L}(w,b,\alpha) = \frac{1}{2}\norm{w}^2 
     - \sum_{i=1}^m{\alpha_i \left[ y^{(i)}(\inner{w}{x^{(i)}} + b) - 1 \right]}
-\]
+\]}
 \end{frame}
 
 \begin{frame}{Duales Problem}
@@ -546,7 +559,6 @@ Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
 \begin{frame}{Weitere Verfahren}
 
   \begin{itemize}
-  \item Regression (z.B. via Least-Mean-Squares)
   \item Entscheidungsbäume
   \item Boosting (Meta-Verfahren) \\
     Kombination mehrerer einfacher Klassifikatoren zu einem guten
@@ -714,12 +726,12 @@ Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
   \end{enumerate}
 
   $\Sigma$ ist symmetrisch und reell \\
-  $\implies$ nach Spektralsatz orthogonal diagonalisierbar
+  $\implies$ orthogonal diagonalisierbar
   (Hauptachsentransformation)
 
   \begin{block}{Ergebnis}
     Eigenwerte $\lambda_1 \geq \cdots \geq \lambda_n$ und \\
-    normierten Eigenvektoren $u_1,\ldots,u_n \in \mathbb{R}^n$ \\
+    normierte Eigenvektoren $u_1,\ldots,u_n \in \mathbb{R}^n$ \\
     Je größer $\lambda_i$ desto größer die Varianz entlang $u_i$
   \end{block}
 \end{frame}
@@ -728,6 +740,7 @@ Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
 
   \begin{itemize}
   \item Abbildung hochdimensionaler Daten auf 2D oder 3D Karte.
+  \item Ähnliche Eingaben werden auf naheliegende Punkte abgebildet
   \item Nutzen als Filter vor weiteren Lernverfahren
   \end{itemize}
   
@@ -738,7 +751,7 @@ Einführung von (verallgemeinerten) Lagrange-Multiplikatoren ergibt dann
 \begin{frame}{Bestärkendes Lernen}
 
   \begin{exampleblock}{Anwendungsgebiete}
-    Lernen durch Interaktion mit der Umgebung
+     Lernen durch Interaktion mit der Umgebung
   \end{exampleblock}
 
   \begin{block}{Trainingsmenge}

@@ -37,7 +37,11 @@ printCluster c (V2 x y) = printf "%5.2f %5.2f %s\n" x y c
 pcaSample :: IO ()
 pcaSample = do
   printf "%-5s %-5s\n" "x" "y"
-  c <- sampleMany 10 (cluster (V2 0 0) (V2 0.2 1) (- pi / 4))
+  xs <- sampleMany 10 (normal 0 1)
+  es <- sampleMany 10 (normal 0 0.1)
+  let ys = zipWith (\x e -> x + e :: Double) xs es
+      c = zipWith V2 xs ys
+  -- c <- sampleMany 10 (cluster (V2 0 0) (V2 0.2 1) (- pi / 4))
   let normC = normalizePCA c
   forM_ normC $ \(V2 x y) -> printf "%.2f %.2f\n" x y
 
